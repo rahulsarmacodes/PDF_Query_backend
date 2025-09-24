@@ -1,0 +1,27 @@
+#FastApi requirements
+fastapi
+uvicorn
+
+#Data validation
+pydantic
+
+#Environment variable management
+python-dotenv
+
+#google gemini (PaLM) Integration
+langchain-google-genai
+google-generativeai
+langchain-community
+
+#Langchain core
+langchain
+langchain-core
+
+#for pdf text extraction
+PyPDF
+pyPDF2
+
+#vector
+faiss-cpu
+
+sentence-transformers
