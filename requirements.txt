@@ -25,3 +25,6 @@ pyPDF2
 faiss-cpu
 
 sentence-transformers
+
+
+python-multipart

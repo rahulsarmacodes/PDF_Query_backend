@@ -2,8 +2,8 @@ from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
-from langchain_community.embeddings import HuggingFaceEmbeddings
-
+#from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings #working
 
 # for using pdfloader
 from langchain_community.document_loaders import PyPDFLoader
@@ -22,20 +22,21 @@ def get_pdf_text(pdf_files: list):
 
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=100, 
-        chunk_overlap=10
+        chunk_size=400, 
+        chunk_overlap=40
     )
     chunks = text_splitter.split_text(text)
     return chunks
 
+
 def get_vector_store(text_chunks):
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embeddings = GoogleGenerativeAIEmbeddings(model='models/gemini-embedding-001');
     metadatas = [{"source": f"chunk-{i+1}"} for i in range(len(text_chunks))]
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings, metadatas= metadatas)
     vector_store.save_local("faiss_index")
     return "Vector store created and saved locally."
 
 def load_vector_store():
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embeddings = embeddings = GoogleGenerativeAIEmbeddings(model='models/gemini-embedding-001');
     vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True )
     return vector_store

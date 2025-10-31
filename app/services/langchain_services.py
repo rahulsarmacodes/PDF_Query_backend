@@ -11,6 +11,7 @@ llm = ChatGoogleGenerativeAI(model='gemini-2.5-flash',temperature=0.3)
 template = """
 You are a chatbot. Answer the user's question based on the information provided below.
 Try to sound conversational. If you can't find the answer in the text, politely say you couldn't find the information.
+Dont add extra symbols and line seperators.
 
 Here is the relevant information:
 {context}
