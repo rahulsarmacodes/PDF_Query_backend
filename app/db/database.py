@@ -1,10 +1,25 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:password@localhost:5432/pdf_query'
+load_dotenv();
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL");
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={"sslmode": "require"},
+    pool_pre_ping=True
+)
+
+# for running locally
+
+# engine = create_engine(
+#     SQLALCHEMY_DATABASE_URL,
+#     pool_pre_ping=True
+# )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
