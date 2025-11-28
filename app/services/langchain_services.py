@@ -1,38 +1,90 @@
-from langchain.chains import RetrievalQA
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from app.services.pdf_loader import load_vector_store
-from langchain.chains import RetrievalQA
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
 
 
-llm = ChatGoogleGenerativeAI(model='gemini-2.5-flash',temperature=0.3)
+# Gemini model
+llm = ChatGoogleGenerativeAI(
+    model='gemini-2.5-flash',
+    temperature=0.3)
 
 
+
+# conversational memory
+memory = ConversationBufferMemory(
+    memory_key="chat_history",
+    input_key="question",
+    output_key="answer",
+    return_messages=True
+)
+
+
+
+#custom prompt
 template = """
-You are a chatbot. Answer the user's question based on the information provided below.
-Try to sound conversational. If you can't find the answer in the text, politely say you couldn't find the information.
-Dont add extra symbols and line seperators.
+***
+You are an AI PDF analysis assistant named "PaperMind".
+Your only purpose is to extract, summarize, and answer questions strictly from the provided PDF Context.
 
-Here is the relevant information:
+Core Rules
+    1.You must not use any external knowledge, assumptions, or prior training data.
+    2.If an answer cannot be found directly in the PDF Context, you must clearly state:
+    “This information is not available in the provided PDF Context.”
+    3.All responses must be concise, accurate, and easy to read.
+
+Response Style
+    1.Use bullet points or numbered lists for structured information.
+    2.Maintain a professional, neutral, and helpful tone at all times.
+    3.Focus on clarity and directness—no unnecessary wording.
+    4.Response politely to the greetings.
+
+Purpose
+    1.Your task is to help users:
+    2.Retrieve information from the PDFs.
+    3.Summarize sections.
+    4.Answer questions strictly based on the text provided.
+    5.Highlight missing information when necessary.
+***
+
+Chat history:
+{chat_history}
+
+PDF Context:
 {context}
 
 User's Question: {question}
 
-Your response: 
+Your response:
 """
 
-prompt = PromptTemplate(template=template, input_variables=["context","question"])
+prompt = PromptTemplate(
+    template=template,
+    input_variables=["chat_history", "context", "question"]
+)
+
 
 #load the vector store
 vector_store = load_vector_store()
 
 #retrive the vector store
-retriever = vector_store.as_retriever()
+retriever = vector_store.as_retriever(search_kwargs={"k": 3}) # higher the value, more the hallucination
 
 #create retrival chain 
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=retriever,
-    chain_type_kwargs = {"prompt": prompt},
-    return_source_documents=True
-  )
+def qa_chain():
+    vector_store = load_vector_store() # Load fresh each time
+    retriever = vector_store.as_retriever()
+    
+    return ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=retriever,
+        memory=memory,
+        combine_docs_chain_kwargs={"prompt": prompt},
+        return_source_documents=True,
+        output_key="answer"
+    )
+
+# Function to clear memory
+def clear_memory():
+    memory.clear()

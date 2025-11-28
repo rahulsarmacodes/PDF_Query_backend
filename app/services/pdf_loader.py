@@ -1,42 +1,61 @@
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 from dotenv import load_dotenv
-#from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_google_genai import GoogleGenerativeAIEmbeddings #working
+from langchain_google_genai import GoogleGenerativeAIEmbeddings  # Gemini embeddings
+from langchain_cohere import CohereEmbeddings # cohere embeddings(working better)
 
-# for using pdfloader
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader # to implement later
 
 load_dotenv()
 
-#extracting text from pdf
+# 1. Extract text from PDF
+
 def get_pdf_text(pdf_files: list):
     text = ""
     for pdf_file in pdf_files:
         pdf_reader = PdfReader(pdf_file)
         for page in pdf_reader.pages:
-            text+=page.extract_text()
+            text += page.extract_text()
     return text
 
 
+# 2. Split text into chunks
+
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=400, 
-        chunk_overlap=40
+        chunk_size=300,
+        chunk_overlap=30
     )
     chunks = text_splitter.split_text(text)
     return chunks
 
 
-def get_vector_store(text_chunks):
-    embeddings = GoogleGenerativeAIEmbeddings(model='models/gemini-embedding-001');
-    metadatas = [{"source": f"chunk-{i+1}"} for i in range(len(text_chunks))]
-    vector_store = FAISS.from_texts(text_chunks, embedding=embeddings, metadatas= metadatas)
-    vector_store.save_local("faiss_index")
-    return "Vector store created and saved locally."
+# 3. Create and save Chroma Vector Store
 
+def get_vector_store(text_chunks):
+    embeddings = CohereEmbeddings(model='embed-multilingual-v3.0')
+    metadatas = [{"source": f"chunk-{i+1}"} for i in range(len(text_chunks))]
+
+    vector_store = Chroma.from_texts( 
+        texts=text_chunks,
+        embedding=embeddings,
+        metadatas=metadatas,
+        persist_directory='my_chroma_db',
+        collection_name='sample' )
+
+    return {
+        "message":"Vector store created and saved locally in 'my_chroma_db'.",
+        "metadata": metadatas,
+        "chunk_size":len(text_chunks)
+    }
+
+# 4. Load existing Chroma Vector Store
 def load_vector_store():
-    embeddings = embeddings = GoogleGenerativeAIEmbeddings(model='models/gemini-embedding-001');
-    vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True )
+    embeddings = CohereEmbeddings(model='embed-multilingual-v3.0')
+    vector_store = Chroma(
+        embedding_function=embeddings,
+        persist_directory='my_chroma_db',
+        collection_name='sample'
+    )
     return vector_store

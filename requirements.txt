@@ -13,6 +13,9 @@ langchain-google-genai
 google-generativeai
 langchain-community
 
+#cohere models
+langchain_cohere
+
 #Langchain core
 langchain
 langchain-core
@@ -23,8 +26,13 @@ pyPDF2
 
 #vector
 faiss-cpu
-
+chromadb
 sentence-transformers
 
+#PostgreSQL
+psycopg2-binary
 
+#authentication
+python-jose[cryptography]
+passlib[bcrypt]
 python-multipart
