@@ -21,13 +21,10 @@ langchain
 langchain-core
 
 #for pdf text extraction
-PyPDF
 pyPDF2
 
 #vector
-faiss-cpu
 chromadb
-sentence-transformers
 
 #PostgreSQL
 psycopg2-binary

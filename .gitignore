@@ -4,15 +4,15 @@ venv/
 
 # Python cache
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+app/__pycache__/
+app/db/__pycache__/
+services/__pycache__/
+
 
 # Environment files (VERY IMPORTANT)
 .env
 
 # AI/RAG temporary storage
-faiss_index/
 my_chroma_db/
 chroma/
 vectorstore/
