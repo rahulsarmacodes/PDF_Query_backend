@@ -1,17 +1,15 @@
-from fastapi import APIRouter ,UploadFile, File, Depends
+from fastapi import APIRouter ,UploadFile, File
 from app.services.pdf_loader import get_pdf_text,get_text_chunks,get_vector_store
 from app.services.langchain_services import qa_chain, clear_memory
 from langchain_community.vectorstores import Chroma
 from langchain_cohere import CohereEmbeddings
-from app.auth.auth import get_current_user
 
 router = APIRouter()
 
 
 
 @router.post("/upload-pdf/")
-async def upload_pdf(
-    files: list[UploadFile] = File(...), user: dict = Depends(get_current_user)):
+async def upload_pdf(files: list[UploadFile] = File(...)):
     try:
         # Extract text from uploaded PDFs
         pdf_text = get_pdf_text([file.file for file in files])
@@ -42,7 +40,7 @@ async def query_pdf(question: str):
     
 
 @router.delete("/clear-embeddings/")
-async def clear_embeddings(user: dict = Depends(get_current_user)):
+async def clear_embeddings():
     try:
 
         #clear history stored in memory
