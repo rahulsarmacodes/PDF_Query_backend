@@ -14,24 +14,13 @@ app.include_router(auth.router)
 
 
 #cors setup
-origins = [
-    "http://localhost:5173",
-    "https://pdf-query-frontend-kohl.vercel.app",
-    "https://pdf-query-frontend-6zi6zzmm0-rahul-sarmas-projects.vercel.app",
-    "https://pdf-query-frontend-git-main-rahul-sarmas-projects.vercel.app/"
-    "https://*.vercel.app"
-]
-
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_origin_regex=r"https://.*\.vercel\.app",
 )
-
 
 
 model.Base.metadata.create_all(bind=engine)
