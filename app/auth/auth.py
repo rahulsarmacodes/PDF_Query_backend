@@ -49,14 +49,18 @@ def get_db():
 
 db_dependency= Annotated[Session, Depends(get_db)]
 
+BCRYPT_MAX_LENGTH = 72
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest):
+    
+    password_to_hash = create_user_request.password[:BCRYPT_MAX_LENGTH];
+    
     create_user_model = User(
         name=create_user_request.name,
         email=create_user_request.email,
         username=create_user_request.username,
-        hashed_password=bcrypt_context.hash(create_user_request.password)
+        hashed_password=bcrypt_context.hash(password_to_hash)
     )
     db.add(create_user_model)
     db.commit()
