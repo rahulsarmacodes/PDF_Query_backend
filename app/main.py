@@ -9,25 +9,19 @@ from app.auth import auth
 from app.auth.auth import get_current_user
 
 app = FastAPI()
-
+app.include_router(routes.router)
+app.include_router(auth.router)
 
 
 #cors setup
-origins = [
-    "http://localhost:5173",   # local frontend
-    "https://pdf-query-frontend-kohl.vercel.app",  # deployed frontend
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(routes.router)
-app.include_router(auth.router)
 
 model.Base.metadata.create_all(bind=engine)
 def get_db():
