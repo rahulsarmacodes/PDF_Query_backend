@@ -82,7 +82,7 @@ async def login_for_acces_token(form_data: Annotated[OAuth2PasswordRequestForm, 
         key="access_token",
         value=token,
         httponly=True,
-        secure=True,       # use only with HTTPS in production
+        secure=False,       # use only with HTTPS in production
         samesite="lax"
     )
     return response
