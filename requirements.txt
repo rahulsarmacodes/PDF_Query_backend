@@ -28,6 +28,7 @@ chromadb
 
 #PostgreSQL
 psycopg2-binary
+SQLAlchemy
 
 #authentication
 python-jose[cryptography]
