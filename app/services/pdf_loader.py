@@ -2,7 +2,7 @@ from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from dotenv import load_dotenv
-from langchain_google_genai import GoogleGenerativeAIEmbeddings  # Gemini embeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings  # Gemini embeddings(not using currently)
 from langchain_cohere import CohereEmbeddings # cohere embeddings(working better)
 
 from langchain_community.document_loaders import PyPDFLoader # to implement later

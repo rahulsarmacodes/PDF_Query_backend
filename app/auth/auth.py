@@ -1,7 +1,6 @@
 from datetime import timedelta, datetime
 from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
@@ -33,11 +32,16 @@ class CreateUserRequest(BaseModel):
     username: Optional[str] = None
     password: str
 
+class UserOut(BaseModel):
+    id: int
+    name: str
+    email: str
+    username: Optional[str] = None
 
 class Token(BaseModel):
     access_token: str
     token_type: str
-
+    user: UserOut
 
 
 def get_db():
@@ -49,18 +53,17 @@ def get_db():
 
 db_dependency= Annotated[Session, Depends(get_db)]
 
-BCRYPT_MAX_LENGTH = 72
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest):
     
-    password_to_hash = create_user_request.password[:BCRYPT_MAX_LENGTH];
+    # Let passlib handle password length correctly. Do not truncate.
     
     create_user_model = User(
         name=create_user_request.name,
         email=create_user_request.email,
         username=create_user_request.username,
-        hashed_password=bcrypt_context.hash(password_to_hash)
+        hashed_password=bcrypt_context.hash(create_user_request.password)
     )
     db.add(create_user_model)
     db.commit()
@@ -72,24 +75,14 @@ async def login_for_acces_token(form_data: Annotated[OAuth2PasswordRequestForm, 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid email or password.')
     
     token = create_access_token(user.email, user.id, timedelta(days=7))
-    response = JSONResponse(content={
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": user.id,
-            "name": user.name,
-            "email": user.email,
-            "username": user.username
-        }
-    })
-    response.set_cookie(
-        key="access_token",
-        value=token,
-        httponly=True,
-        secure=False,       # use only with HTTPS in production
-        samesite="lax"
+
+    # Return a Pydantic model to let FastAPI handle serialization and validation.
+    # Cookie setting should be handled in the response object at the endpoint level.
+    return Token(
+        access_token=token,
+        token_type="bearer",
+        user=UserOut.model_validate(user)
     )
-    return response
 
     
 def authenticate_user(email: str, password: str, db):
