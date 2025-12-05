@@ -54,7 +54,7 @@ BCRYPT_MAX_LENGTH = 72
 async def create_user(db: db_dependency,
                       create_user_request: CreateUserRequest):
     
-    password_to_hash = create_user_request.password[:BCRYPT_MAX_LENGTH]
+    password_to_hash = create_user_request.password[:BCRYPT_MAX_LENGTH];
     
     create_user_model = User(
         name=create_user_request.name,
